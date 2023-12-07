@@ -5,7 +5,7 @@ import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { MemoryBlockstore } from 'blockstore-core'
 import { MemoryDatastore } from 'datastore-core'
-import { PublicDirectory } from "wnfs";
+import { PublicDirectory, PublicFile } from "wnfs";
 import { createLibp2p } from 'libp2p'
 import { ping } from '@libp2p/ping'
 import * as filters from '@libp2p/websockets/filters'
@@ -18,10 +18,16 @@ console.log("node address:", multiaddrs);
 const wnfsBlockstore = new WnfsBlockstore(node)
 const dir = new PublicDirectory(new Date());
 var { rootDir } = await dir.mkdir(["pictures"], new Date(), wnfsBlockstore);
+//await rootDir.store(wnfsBlockstore);
 var { result } = await rootDir.ls(["pictures"], wnfsBlockstore);
 console.log("Files in /pictures directory:", result);
 
-var content = encoder.encode('Hello World 101\n')
+var content = new TextEncoder().encode('Hello World 101\n')
+
+const file = new PublicFile(new Date());
+const file2 = await file.setContent(new Date(), content, wnfsBlockstore);
+const readBack = await file2.readAt(0, undefined, wnfsBlockstore);
+console.log("file: ", new TextDecoder().decode(readBack))
 
 var { rootDir } = await rootDir.write(
   ["pictures", "tabby.txt"],
