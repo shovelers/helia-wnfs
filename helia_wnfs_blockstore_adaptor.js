@@ -7,16 +7,15 @@ export class WnfsBlockstore {
   }
 
   async getBlock (cid){
-    return this.helia.blockstore.get(cid)
+    const decoded_cid = CID.decode(cid)
+    return this.helia.blockstore.get(decoded_cid)
   }
   
   async putBlock (bytes, codec){
-    console.log("I am here")
     const multihash = await sha256.digest(bytes)
     const cid = CID.createV1(codec, multihash)
     this.helia.blockstore.put(cid, bytes)
-    console.log("bye")
-    return cid
+    return cid.bytes
   }
 }
 
