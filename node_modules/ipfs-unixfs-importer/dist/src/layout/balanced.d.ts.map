@@ -1,0 +1,1 @@
+{"version":3,"file":"balanced.d.ts","sourceRoot":"","sources":["../../../src/layout/balanced.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,YAAY,CAAA;AAK5C,MAAM,WAAW,eAAe;IAC9B,kBAAkB,CAAC,EAAE,MAAM,CAAA;CAC5B;AAED,wBAAgB,QAAQ,CAAE,OAAO,CAAC,EAAE,eAAe,GAAG,UAAU,CAgB/D"}

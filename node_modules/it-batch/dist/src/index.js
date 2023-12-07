@@ -1,0 +1,86 @@
+/**
+ * @packageDocumentation
+ *
+ * The final batch may be smaller than the max.
+ *
+ * @example
+ *
+ * ```javascript
+ * import batch from 'it-batch'
+ * import all from 'it-all'
+ *
+ * // This can also be an iterator, generator, etc
+ * const values = [0, 1, 2, 3, 4]
+ * const batchSize = 2
+ *
+ * const result = all(batch(values, batchSize))
+ *
+ * console.info(result) // [0, 1], [2, 3], [4]
+ * ```
+ *
+ * Async sources must be awaited:
+ *
+ * ```javascript
+ * import batch from 'it-batch'
+ * import all from 'it-all'
+ *
+ * const values = async function * () {
+ *   yield * [0, 1, 2, 3, 4]
+ * }
+ *
+ * const batchSize = 2
+ * const result = await all(batch(values(), batchSize))
+ *
+ * console.info(result) // [0, 1], [2, 3], [4]
+ * ```
+ */
+function isAsyncIterable(thing) {
+    return thing[Symbol.asyncIterator] != null;
+}
+function batch(source, size = 1) {
+    size = Number(size);
+    if (isAsyncIterable(source)) {
+        return (async function* () {
+            let things = [];
+            if (size < 1) {
+                size = 1;
+            }
+            if (size !== Math.round(size)) {
+                throw new Error('Batch size must be an integer');
+            }
+            for await (const thing of source) {
+                things.push(thing);
+                while (things.length >= size) {
+                    yield things.slice(0, size);
+                    things = things.slice(size);
+                }
+            }
+            while (things.length > 0) {
+                yield things.slice(0, size);
+                things = things.slice(size);
+            }
+        }());
+    }
+    return (function* () {
+        let things = [];
+        if (size < 1) {
+            size = 1;
+        }
+        if (size !== Math.round(size)) {
+            throw new Error('Batch size must be an integer');
+        }
+        for (const thing of source) {
+            things.push(thing);
+            while (things.length >= size) {
+                yield things.slice(0, size);
+                things = things.slice(size);
+            }
+        }
+        while (things.length > 0) {
+            yield things.slice(0, size);
+            things = things.slice(size);
+        }
+    }());
+}
+export default batch;
+//# sourceMappingURL=index.js.map

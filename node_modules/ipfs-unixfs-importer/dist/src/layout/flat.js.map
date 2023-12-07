@@ -1,0 +1,1 @@
+{"version":3,"file":"flat.js","sourceRoot":"","sources":["../../../src/layout/flat.ts"],"names":[],"mappings":"AAAA,OAAO,GAAG,MAAM,QAAQ,CAAA;AAIxB,MAAM,UAAU,IAAI;IAClB,OAAO,KAAK,UAAU,UAAU,CAAE,MAAM,EAAE,MAAM;QAC9C,OAAO,MAAM,CAAC,MAAM,GAAG,CAAC,MAAM,CAAC,CAAC,CAAA;IAClC,CAAC,CAAA;AACH,CAAC"}

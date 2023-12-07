@@ -9,62 +9,34 @@ import { PublicDirectory } from "wnfs";
 import { createLibp2p } from 'libp2p'
 import { ping } from '@libp2p/ping'
 import * as filters from '@libp2p/websockets/filters'
-import { CID } from 'multiformats/cid'
 import { WnfsBlockstore } from './helia_wnfs_blockstore_adaptor.js';
 
 const node = await createNode()
 const multiaddrs = node.libp2p.getMultiaddrs()
 console.log("node address:", multiaddrs);
 
-const fs = unixfs(node)
-const encoder = new TextEncoder()
-
-const cid = await fs.addBytes(encoder.encode('Hello World 101'), {
-  onProgress: (evt) => {
-    //console.info('add event', evt.type, evt.detail)
-  }
-})
-
-console.log('Added file:', cid.toString())
-const decoder = new TextDecoder()
-let text = ''
-
-for await (const chunk of fs.cat(cid, {
-  onProgress: (evt) => {
-    //console.info('cat event', evt.type, evt.detail)
-  }
-})) {
-  text += decoder.decode(chunk, {
-    stream: true
-  })
-}
-
-//console.log('Added file contents:', text)
-
 const wnfsBlockstore = new WnfsBlockstore(node)
-//wnfsBlockstore.putBlock();
 const dir = new PublicDirectory(new Date());
-var { rootDir } = await dir.mkdir(["pictures", "cats"], new Date(), wnfsBlockstore);
+var { rootDir } = await dir.mkdir(["pictures"], new Date(), wnfsBlockstore);
 var { result } = await rootDir.ls(["pictures"], wnfsBlockstore);
-console.log("Files in /pictures/cats directory:", result);
+console.log("Files in /pictures directory:", result);
 
-const cidTest = CID.parse('bafkreiafj3pmdubbd5re73imxsu5j6kabmheshcdoqvpfrnqvpv7bsmq3a').bytes;
+var content = encoder.encode('Hello World 101\n')
 
 var { rootDir } = await rootDir.write(
-  ["pictures", "cats", "tabby.png"],
-  cidTest,
+  ["pictures", "tabby.txt"],
+  content,
   new Date(),
   wnfsBlockstore
 );
 console.log("root after write", rootDir)
 
-await rootDir.store(wnfsBlockstore);
+await rootDir.store(wnfsBlockstore)
 
 // List all files in /pictures directory.
-var { result } = await rootDir.ls(["pictures", "cats"], wnfsBlockstore);
+var { result } = await rootDir.ls(["pictures"], wnfsBlockstore);
 
-console.log("Files in /pictures/cats directory:", result);
-
+console.log("Files in /pictures directory:", result);
 
 async function createNode () {
   // the blockstore is where we store the blocks that make up files
