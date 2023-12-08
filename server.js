@@ -14,11 +14,9 @@ server.use(cors());
 
 server.use(express.urlencoded({ extended: true }));
 server.set('views', path.join(__dirname, 'views'));
-server.set('view engine', 'ejs');
 server.use(express.static(path.join(__dirname, 'public')));
 
-server.get("/", (req, res) => {
-  res.render('pages/index')
+server.get("/", async (req, res) => {
 });
 
 server.listen(port, (err) => {

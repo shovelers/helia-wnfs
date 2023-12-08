@@ -4,41 +4,44 @@ import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { MemoryBlockstore } from 'blockstore-core'
 import { MemoryDatastore } from 'datastore-core'
-import { PublicDirectory } from "wnfs";
 import { createLibp2p } from 'libp2p'
 import { ping } from '@libp2p/ping'
 import * as filters from '@libp2p/websockets/filters'
-import { WnfsBlockstore } from './src/helia_wnfs_blockstore_adaptor.js';
-import { CID } from 'multiformats/cid'
+import { unixfs } from '@helia/unixfs'
 
 const node = await createNode()
 const multiaddrs = node.libp2p.getMultiaddrs()
 console.log("node address:", multiaddrs);
 
-const wnfsBlockstore = new WnfsBlockstore(node)
-const dir = new PublicDirectory(new Date());
-var { rootDir } = await dir.mkdir(["pictures", "cats"], new Date(), wnfsBlockstore);
+const fs = unixfs(node)
 
-var content = new TextEncoder().encode("Hello World 101")
+// we will use this TextEncoder to turn strings into Uint8Arrays
+const encoder = new TextEncoder()
 
-var { rootDir } = await rootDir.write(
-  ["pictures", "cats", "tabby.txt"],
-  content,
-  new Date(),
-  wnfsBlockstore
-);
-console.log("root after write", rootDir)
+// add the bytes to your node and receive a unique content identifier
+const cid = await fs.addBytes(encoder.encode('Hello World 101'), {
+  onProgress: (evt) => {
+    console.info('add event', evt.type, evt.detail)
+  }
+})
 
-var rootDirCID = await rootDir.store(wnfsBlockstore)
-console.log("rootDirCID:", CID.decode(rootDirCID))
+console.log('Added file:', cid.toString())
 
-// List all files in /pictures directory.
-var result  = await rootDir.ls(["pictures"], wnfsBlockstore);
-console.log("existent test: ",result)
+// this decoder will turn Uint8Arrays into strings
+const decoder = new TextDecoder()
+let text = ''
 
-var fileContent = await rootDir.read(["pictures", "cats", "tabby.txt"], wnfsBlockstore)
+for await (const chunk of fs.cat(cid, {
+  onProgress: (evt) => {
+    console.info('cat event', evt.type, evt.detail)
+  }
+})) {
+  text += decoder.decode(chunk, {
+    stream: true
+  })
+}
 
-console.log("Files Content:", new TextDecoder().decode(fileContent));
+console.log('Added file contents:', text)
 
 async function createNode () {
   // the blockstore is where we store the blocks that make up files
@@ -70,8 +73,7 @@ async function createNode () {
       }),
     },
   })
-  
-  
+
   return await createHelia({
     datastore,
     blockstore,
