@@ -10,6 +10,7 @@ import { multiaddr } from 'multiaddr'
 import * as filters from '@libp2p/websockets/filters'
 import { WnfsBlockstore } from './helia_wnfs_blockstore_adaptor.js';
 import { PublicDirectory } from "wnfs";
+import { CID } from 'multiformats/cid'
 
 var rootDirCID
 
@@ -35,23 +36,18 @@ async function write_data(node, data) {
   console.log("root after write", rootDir)
 
   rootDirCID = await rootDir.store(wnfsBlockstore)
-  console.log("rootDirCID:", rootDirCID)
-
-  // List all files in /pictures directory.
-  var result = await rootDir.ls(["pictures"], wnfsBlockstore);
-  console.log("existent test: ", result)
-
-  var fileContent = await rootDir.read(["pictures", "cats", "tabby.txt"], wnfsBlockstore)
-
-  console.log("Files Content:", new TextDecoder().decode(fileContent));
+  window.rootDirCID = rootDirCID
+  console.log("rootDirCID:", CID.decode(rootDirCID))
 }
 
-async function readFile(node, path) {
+async function readFile(node, cid) {
   const wnfsBlockstore = new WnfsBlockstore(node)
-  const dir = new PublicDirectory(new Date());
-  var root = await PublicDirectory.load(rootDirCID ,wnfsBlockstore)
-  console.log("loaded root:", root)
-  var fileContent = await root.read(["pictures", "cats", "tabby.txt"], wnfsBlockstore)
+  console.log("passed cid: ",CID.parse(cid).bytes)
+  console.log("rootDirCID: ",rootDirCID)
+  await node.pins.add(CID.parse(cid))
+  var rootDir = await PublicDirectory.load(CID.parse(cid).bytes ,wnfsBlockstore)
+  console.log("loaded root:", rootDir)
+  var fileContent = await rootDir.read(["pictures", "cats", "tabby.txt"], wnfsBlockstore)
   console.log("Files Content:", fileContent);
   return new TextDecoder().decode(fileContent)
 }
@@ -91,4 +87,4 @@ async function createHeliaNode() {
   })
 }
 
-export { createHeliaNode, dial, write_data, readFile }
+export { createHeliaNode, dial, write_data, readFile, CID }
