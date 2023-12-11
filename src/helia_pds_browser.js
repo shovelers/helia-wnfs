@@ -78,7 +78,7 @@ async function writePrivateData(node, data) {
   var { rootDir, forest } = await rootDir.write(["private", "cats", "tabby.png"], true, privateContent, new Date(), forest, wnfsBlockstore, rng);
   
   var privateDirResult = await rootDir.store(forest, wnfsBlockstore, rng)
-  var forestCid = await forest.store(wnfsBlockstore)
+  var forestCid = await privateDirResult[1].store(wnfsBlockstore)
   window.privateDirResult = privateDirResult
   window.forestCid = forestCid
   return privateDirResult
