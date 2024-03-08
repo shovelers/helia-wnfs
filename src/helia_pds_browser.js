@@ -9,7 +9,7 @@ import { ping } from '@libp2p/ping'
 import { identify } from '@libp2p/identify'
 import { webSockets } from '@libp2p/websockets'
 import * as filters from '@libp2p/websockets/filters'
-import { multiaddr } from 'multiaddr'
+import { multiaddr } from '@multiformats/multiaddr'
 import { WnfsBlockstore, PrivateKey} from './helia_wnfs_blockstore_adaptor.js';
 import { PublicDirectory, PrivateDirectory, PrivateForest, PrivateNode, AccessKey, receiveShare, Name, NameAccumulator } from "wnfs";
 import { CID } from 'multiformats/cid'
